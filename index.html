@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>kane</title>
+</head><body>
+<script type="module">
+import { cr, rgb, asset } from "https://js.sabae.cc/aframe.js";
+const scene = cr("a-scene");
+//scene.setAttribute("renderer", "precision: mediump; antialias: false; alpha: true; logarithmicDepthBuffer: true; colorManagement: true;");
+scene.setAttribute("renderer", "colorManagement: true;");
+document.body.appendChild(scene);
+/*
+const box = cr("a-box", scene);
+box.setAttribute("position", { x: 0, y: 1, z: -2 });
+box.setAttribute("color", rgb(255, 100, 100));
+*/
+// for pc
+const isQuest = navigator.userAgent.indexOf("Quest") >= 0;
+const y = isQuest ? 0 : 0;
+const scale = isQuest ? 1 : 1;
+{
+  const obj = cr("a-entity", scene);
+  obj.setAttribute("gltf-model", asset("./kane.glb"));
+  obj.setAttribute("position", { x: 0, y, z: -1 });
+  obj.setAttribute("scale", { x: scale, y: scale, z: scale });
+
+  /*
+  const cylinder = cr("a-cylinder", obj);
+  cylinder.setAttribute("color", "red");
+  cylinder.setAttribute("radius", .3);
+  //cylinder.setAttribtue("rotation", { x: 90, y: 90, z: 0 });
+  cylinder.setAttribtue("position", { x: 0, y: 5, z: 0 });
+  //obj.appendChild(cylinder);
+  */
+}
+
+const audio = new Audio();
+audio.src = "./kane-sound.mp3";
+const kaan = () => {
+  audio.currentTime = 0;
+  audio.play();
+};
+
+// debug
+/*
+const text = cr("a-entity", scene);
+text.setAttribute("text", "width: 4; value: { x: 3, }");
+text.setAttribute("geometry", "primitive: plane; height: auto; width: auto");
+text.setAttribute("material", "color: black");
+text.setAttribute("position", { x: 1, y: 1.5, z: -.5 });
+const log = (o) => {
+  text.setAttribute("text", "width: 4; value: " + JSON.stringify(o));
+};
+*/
+
+// controller
+// <a-entity id=handleft oculus-touch-controls="hand: left"></a-entity>
+{
+  const handright = cr("a-entity", scene);
+  handright.setAttribute("oculus-touch-controls", "hand: right; model: false");
+  handright.setAttribute("position", { x: 0, y: 1.45, z: -.2 });
+
+  const obj = cr("a-entity", handright);
+  obj.setAttribute("gltf-model", asset("./kine.glb"));
+  obj.setAttribute("position", { x: .1, y: 0, z: 0 });
+  obj.setAttribute("rotation", { x: 0, y: 0, z: 0 });
+
+  const getHit = () => {
+    const p = handright.getAttribute("position");
+
+    if (p.y >= 1.4 && p.y < 2) {
+      const dx = p.x;
+      const dz = p.z - -0.85;
+      const d = Math.sqrt(dx * dx + dz * dz);
+      //log(d);
+      return d < .3;
+    }
+    return false;
+  };
+  let flgbk = false;
+  setInterval(() => {
+    const flg = getHit();
+    if (flg && !flgbk) {
+      kaan();
+    }
+    flgbk = flg;
+  }, 1000 / 60);
+
+  handright.addEventListener("triggerdown", (e) => {
+    kaan();
+  });
+}
+
+// omake
+if (false) {
+  const scale = 0.5;
+  const obj = cr("a-entity", scene);
+  obj.setAttribute("gltf-model", asset("https://immersive-web.github.io/webxr-samples/media/gltf/space/space.gltf"));
+  obj.setAttribute("position", { x: 0, y: 0, z: 0 });
+  obj.setAttribute("scale", { x: scale, y: scale, z: scale });
+}
+
+</script>
+</body></html>
